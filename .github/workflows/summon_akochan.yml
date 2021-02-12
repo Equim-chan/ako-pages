@@ -1,0 +1,115 @@
+name: Summon Akochan
+
+on:
+  push:
+    paths:
+      - 'env.sh'
+      - '.github/**'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Environment preparation
+        run: |
+          set -x
+
+          git clone --depth=1 https://github.com/critter-mj/akochan.git
+          git --git-dir=akochan/.git rev-parse --short HEAD
+          git clone --depth=1 https://github.com/Equim-chan/akochan-reviewer.git
+          git --git-dir=akochan-reviewer/.git rev-parse --short HEAD
+
+          sudo apt-get update
+          sudo apt-get install -y gcc-10 g++-10 libboost-system-dev
+          sudo apt-get remove gcc g++
+          sudo ln -sf /usr/bin/gcc-10 /usr/local/bin/gcc
+          sudo ln -sf /usr/bin/gcc-10 /usr/local/bin/cc
+          sudo ln -sf /usr/bin/g++-10 /usr/local/bin/g++
+          sudo ln -sf /usr/bin/g++-10 /usr/local/bin/c++
+
+          rustup toolchain update --no-self-update stable
+          rustup default stable
+          rustup show
+
+          node --version
+          yarn --version
+          yarn global add html-minifier
+
+          lscpu
+          free -h
+
+          gcc -march=native -Q --help=target | grep march | head -n 1 | awk '{print $2}' | tee ARCH
+          nproc | tee NPROC
+
+      - name: Cache akochan
+        id: cache-akochan
+        uses: actions/cache@v2
+        with:
+          path: |
+            akochan
+            !akochan/**/*.cpp
+            !akochan/**/*.hpp
+            !akochan/**/*.c
+            !akochan/**/*.h
+          # change it manually when needed
+          key: ${{ runner.os }}-akochan-0-${{ hashFiles('ARCH', 'NPROC') }}
+      - name: Cache akochan-reviewer
+        id: cache-akochan-reviewer
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            akochan-reviewer/target
+          # change it manually when needed
+          key: ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}
+
+      - name: Build akochan
+        # if: steps.cache-akochan.outputs.cache-hit != 'true'
+        run: |
+          cd akochan/ai_src
+          sed -i 's/CFLAGS =/CFLAGS = -march=native -ffast-math/' Makefile_Linux
+          make -j$(nproc) -f Makefile_Linux
+          cd ..
+          sed -i 's/CFLAGS =/CFLAGS = -march=native -ffast-math/' Makefile_Linux
+          make -j$(nproc) -f Makefile_Linux
+
+      - name: Build akochan-reviewer
+        # if: steps.cache-akochan-reviewer.outputs.cache-hit != 'true'
+        env:
+          RUSTFLAGS: -C target-cpu=native
+        run: |
+          cd akochan-reviewer
+          cargo build --release
+
+      - name: Run akochan-reviewer
+        run: |
+          source env.sh
+          cd akochan-reviewer
+          env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../akochan \
+            target/release/akochan-reviewer -d ../akochan --no-open -o ../report.html "${ARGS[@]}"
+
+      - name: Compress report
+        run: |
+          source env.sh
+          "$(yarn global bin)"/html-minifier -o "$OUTPUT" \
+            --collapse-whitespace \
+            --collapse-boolean-attributes \
+            --remove-optional-tags \
+            --remove-redundant-attributes \
+            --remove-script-type-attributes \
+            --remove-attribute-quotes \
+            --use-short-doctype \
+            --minify-css true \
+            --sort-attributes \
+            --sort-class-name \
+            report.html
+
+      - name: Publish report
+        env:
+          ARDW_TOKEN: ${{ secrets.ARDW_TOKEN }}
+        run: |
+          source env.sh
+          curl -X POST -F "report=@$OUTPUT" -H "X-ARDW-Token: $ARDW_TOKEN" https://akochan.ekyu.moe/internal/submit-from-gh
