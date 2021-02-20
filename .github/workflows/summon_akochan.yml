@@ -50,11 +50,7 @@ jobs:
         with:
           path: |
             akochan
-            !akochan/**/*.cpp
-            !akochan/**/*.hpp
-            !akochan/**/*.c
-            !akochan/**/*.h
-            !akochan/**/Makefile*
+            !akochan/.git
           # change it manually when needed
           key: ${{ runner.os }}-akochan-0-${{ hashFiles('ARCH', 'NPROC') }}-${{ hashFiles('AKOCHAN_VER') }}
       - name: Cache akochan-reviewer
@@ -72,6 +68,7 @@ jobs:
             ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-
 
       - name: Build akochan
+        if: steps.cache-akochan.outputs.cache-hit != 'true'
         run: |
           sed -i 's/CFLAGS =/CFLAGS = -march=native -ffast-math/' akochan/Makefile_Linux akochan/ai_src/Makefile_Linux
           make -C akochan/ai_src -j$(nproc) -f Makefile_Linux
