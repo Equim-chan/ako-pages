@@ -84,8 +84,9 @@ jobs:
       - name: Run akochan-reviewer
         run: |
           source env.sh
-          env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:akochan \
-            akochan-reviewer/target/release/akochan-reviewer -d akochan --no-open -o report.html "${ARGS[@]}"
+          cd akochan-reviewer
+          env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../akochan \
+            target/release/akochan-reviewer -d ../akochan --no-open -o report.html "${ARGS[@]}"
 
       - name: Compress report
         run: |
