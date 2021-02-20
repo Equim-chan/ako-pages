@@ -49,9 +49,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            akochan/**/*.o
+            akochan
+            !akochan/**/*.cpp
+            !akochan/**/*.hpp
+            !akochan/**/*.c
+            !akochan/**/*.h
+            !akochan/**/Makefile*
           # change it manually when needed
-          key: ${{ runner.os }}-akochan-1-${{ hashFiles('ARCH', 'NPROC') }}-${{ hashFiles('AKOCHAN_VER') }}
+          key: ${{ runner.os }}-akochan-0-${{ hashFiles('ARCH', 'NPROC') }}-${{ hashFiles('AKOCHAN_VER') }}
       - name: Cache akochan-reviewer
         id: cache-akochan-reviewer
         uses: actions/cache@v2
