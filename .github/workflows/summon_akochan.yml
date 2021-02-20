@@ -17,7 +17,7 @@ jobs:
           set -x
 
           git clone --depth=1 https://github.com/critter-mj/akochan.git
-          git --git-dir=akochan/.git rev-parse --short HEAD
+          git --git-dir=akochan/.git rev-parse --short HEAD | tee AKOCHAN_VER
           git clone --depth=1 https://github.com/Equim-chan/akochan-reviewer.git
           git --git-dir=akochan-reviewer/.git rev-parse --short HEAD
 
@@ -54,7 +54,7 @@ jobs:
             !akochan/**/*.c
             !akochan/**/*.h
           # change it manually when needed
-          key: ${{ runner.os }}-akochan-0-${{ hashFiles('ARCH', 'NPROC') }}
+          key: ${{ runner.os }}-akochan-0-${{ hashFiles('ARCH', 'NPROC', 'AKOCHAN_VER') }}
       - name: Cache akochan-reviewer
         id: cache-akochan-reviewer
         uses: actions/cache@v2
@@ -64,20 +64,15 @@ jobs:
             ~/.cargo/git
             akochan-reviewer/target
           # change it manually when needed
-          key: ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH', 'akochan-reviewer/**/Cargo.lock') }}
 
       - name: Build akochan
-        # if: steps.cache-akochan.outputs.cache-hit != 'true'
         run: |
-          cd akochan/ai_src
-          sed -i 's/CFLAGS =/CFLAGS = -march=native -ffast-math/' Makefile_Linux
-          make -j$(nproc) -f Makefile_Linux
-          cd ..
-          sed -i 's/CFLAGS =/CFLAGS = -march=native -ffast-math/' Makefile_Linux
-          make -j$(nproc) -f Makefile_Linux
+          sed -i 's/CFLAGS =/CFLAGS = -march=native -ffast-math/' akochan/Makefile_Linux akochan/ai_src/Makefile_Linux
+          make -C akochan/ai_src -j$(nproc) -f Makefile_Linux
+          make -C akochan -j$(nproc) -f Makefile_Linux
 
       - name: Build akochan-reviewer
-        # if: steps.cache-akochan-reviewer.outputs.cache-hit != 'true'
         env:
           RUSTFLAGS: -C target-cpu=native
         run: |
@@ -87,9 +82,8 @@ jobs:
       - name: Run akochan-reviewer
         run: |
           source env.sh
-          cd akochan-reviewer
-          env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../akochan \
-            target/release/akochan-reviewer -d ../akochan --no-open -o ../report.html "${ARGS[@]}"
+          env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:akochan \
+            akochan-reviewer/target/release/akochan-reviewer -d akochan --no-open -o report.html "${ARGS[@]}"
 
       - name: Compress report
         run: |
