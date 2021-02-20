@@ -40,6 +40,7 @@ jobs:
           lscpu
           free -h
 
+          rustc --version | tee RUSTC_VER
           gcc -march=native -Q --help=target | grep march | head -n 1 | awk '{print $2}' | tee ARCH
           nproc | tee NPROC
 
@@ -64,9 +65,10 @@ jobs:
             ~/.cargo/git
             akochan-reviewer/target
           # change it manually when needed
-          key: ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}
+            ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-
+            ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-
 
       - name: Build akochan
         run: |
