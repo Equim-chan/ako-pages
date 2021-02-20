@@ -54,7 +54,7 @@ jobs:
             !akochan/**/*.c
             !akochan/**/*.h
           # change it manually when needed
-          key: ${{ runner.os }}-akochan-0-${{ hashFiles('ARCH', 'NPROC', 'AKOCHAN_VER') }}
+          key: ${{ runner.os }}-akochan-0-${{ hashFiles('ARCH', 'NPROC') }}-${{ hashFiles('AKOCHAN_VER') }}
       - name: Cache akochan-reviewer
         id: cache-akochan-reviewer
         uses: actions/cache@v2
@@ -64,7 +64,9 @@ jobs:
             ~/.cargo/git
             akochan-reviewer/target
           # change it manually when needed
-          key: ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH', 'akochan-reviewer/**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-0-${{ hashFiles('ARCH') }}
 
       - name: Build akochan
         run: |
