@@ -72,7 +72,7 @@ jobs:
         run: |
           sed -i \
             -e 's/CFLAGS =/CFLAGS = -march=native -ffast-math/' \
-            -e 's@-L\./ -lai@-L\./ -Wl,-rpath,./ -li@' \
+            -e 's@-L\./ -lai@-L./ -Wl,-rpath,./ -li@' \
             akochan/Makefile_Linux akochan/ai_src/Makefile_Linux
           make -C akochan/ai_src -j$(nproc) -f Makefile_Linux
           make -C akochan -j$(nproc) -f Makefile_Linux
