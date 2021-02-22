@@ -19,7 +19,7 @@ jobs:
           git clone --depth=1 https://github.com/critter-mj/akochan.git
           git --git-dir=akochan/.git rev-parse --short HEAD | tee AKOCHAN_VER
           git clone --depth=1 https://github.com/Equim-chan/akochan-reviewer.git
-          git --git-dir=akochan-reviewer/.git rev-parse --short HEAD
+          git --git-dir=akochan-reviewer/.git rev-parse --short HEAD | tee REVIEWER_VER
 
           sudo apt-get update
           sudo apt-get install -y gcc-10 g++-10 libboost-system-dev
@@ -62,8 +62,9 @@ jobs:
             ~/.cargo/git
             akochan-reviewer/target
           # change it manually when needed
-          key: ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-${{ hashFiles('REVIEWER_VER') }}
           restore-keys: |
+            ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-
             ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-
             ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-
 
