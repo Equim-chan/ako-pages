@@ -79,6 +79,7 @@ jobs:
           make -C akochan -j$(nproc) -f Makefile_Linux
 
       - name: Build akochan-reviewer
+        if: steps.cache-akochan-reviewer.outputs.cache-hit != 'true'
         env:
           RUSTFLAGS: -C target-cpu=native
         run: |
