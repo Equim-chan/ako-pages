@@ -41,7 +41,7 @@ jobs:
           lscpu
           free -h
 
-          rustc --version | tee RUSTC_VER
+          rustc --version | awk '{print $2}' | tee RUSTC_VER
           gcc -march=native -Q --help=target | grep march | head -n 1 | awk '{print $2}' | tee ARCH
           nproc | tee NPROC
           
@@ -73,7 +73,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-
             ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-
-            ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-
 
       - name: Build akochan
         if: steps.cache-akochan.outputs.cache-hit != 'true'
