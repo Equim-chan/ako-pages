@@ -13,13 +13,14 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Environment preparation
+        id: prep
         run: |
           set -x
 
           git clone --depth=1 https://github.com/critter-mj/akochan.git
-          git --git-dir=akochan/.git rev-parse --short HEAD | tee AKOCHAN_VER
+          git --git-dir=akochan/.git rev-parse --short HEAD | tee AKOCHAN_REV
           git clone --depth=1 https://github.com/Equim-chan/akochan-reviewer.git
-          git --git-dir=akochan-reviewer/.git rev-parse --short HEAD | tee REVIEWER_VER
+          git --git-dir=akochan-reviewer/.git rev-parse --short HEAD | tee REVIEWER_REV
 
           sudo apt-get update
           sudo apt-get install -y gcc-10 g++-10 libboost-system-dev
@@ -43,6 +44,12 @@ jobs:
           rustc --version | tee RUSTC_VER
           gcc -march=native -Q --help=target | grep march | head -n 1 | awk '{print $2}' | tee ARCH
           nproc | tee NPROC
+          
+          echo "::set-output name=akochan_rev::$(cat AKOCHAN_REV)"
+          echo "::set-output name=reviewer_rev::$(cat REVIEWER_REV)"
+          echo "::set-output name=rustc_ver::$(cat RUSTC_VER)"
+          echo "::set-output name=arch::$(cat ARCH)"
+          echo "::set-output name=nproc::$(cat NPROC)"
 
       - name: Cache akochan
         id: cache-akochan
@@ -52,7 +59,7 @@ jobs:
             akochan
             !akochan/.git
           # change it manually when needed
-          key: ${{ runner.os }}-akochan-2-${{ hashFiles('ARCH', 'NPROC') }}-${{ hashFiles('AKOCHAN_VER') }}
+          key: ${{ runner.os }}-akochan-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.nproc }}-${{ steps.prep.outputs.akochan_rev }}
       - name: Cache akochan-reviewer
         id: cache-akochan-reviewer
         uses: actions/cache@v2
@@ -62,11 +69,11 @@ jobs:
             ~/.cargo/git
             akochan-reviewer/target
           # change it manually when needed
-          key: ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-${{ hashFiles('REVIEWER_VER') }}
+          key: ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-${{ steps.prep.outputs.reviewer_rev }}
           restore-keys: |
-            ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-
-            ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-${{ hashFiles('RUSTC_VER') }}-
-            ${{ runner.os }}-cargo-1-${{ hashFiles('ARCH') }}-
+            ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-
+            ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-
+            ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-
 
       - name: Build akochan
         if: steps.cache-akochan.outputs.cache-hit != 'true'
