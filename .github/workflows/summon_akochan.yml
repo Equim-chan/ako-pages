@@ -59,7 +59,7 @@ jobs:
             akochan
             !akochan/.git
           # change it manually when needed
-          key: ${{ runner.os }}-akochan-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.nproc }}-${{ steps.prep.outputs.akochan_rev }}
+          key: ${{ runner.os }}|akochan|0|${{ steps.prep.outputs.arch }}|${{ steps.prep.outputs.nproc }}|${{ steps.prep.outputs.akochan_rev }}
       - name: Cache akochan-reviewer
         id: cache-akochan-reviewer
         uses: actions/cache@v2
@@ -69,10 +69,10 @@ jobs:
             ~/.cargo/git
             akochan-reviewer/target
           # change it manually when needed
-          key: ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-${{ steps.prep.outputs.reviewer_rev }}
+          key: ${{ runner.os }}|cargo|0|${{ steps.prep.outputs.arch }}|${{ steps.prep.outputs.rustc_ver }}|${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}|${{ steps.prep.outputs.reviewer_rev }}
           restore-keys: |
-            ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}-
-            ${{ runner.os }}-cargo-0-${{ steps.prep.outputs.arch }}-${{ steps.prep.outputs.rustc_ver }}-
+            ${{ runner.os }}|cargo|0|${{ steps.prep.outputs.arch }}|${{ steps.prep.outputs.rustc_ver }}|${{ hashFiles('akochan-reviewer/**/Cargo.lock') }}|
+            ${{ runner.os }}|cargo|0|${{ steps.prep.outputs.arch }}|${{ steps.prep.outputs.rustc_ver }}|
 
       - name: Build akochan
         if: steps.cache-akochan.outputs.cache-hit != 'true'
