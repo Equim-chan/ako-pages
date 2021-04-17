@@ -1,2 +1,2 @@
-OUTPUT=613c49cfd93a42e5.html
-ARGS=(--anonymous -m '210417-be217f0f-0903-4d4a-9557-befb6e8eb1c5_a878288992gsoul.game.yo-star.com/?paipu=210417-be217f0f-0903-4d4a-9557-befb6e8eb1c5_a878288992' -e -n 0.01 --lang ja)
+OUTPUT=db289999ec5b38e0.html
+ARGS=(--anonymous -t 2021041708gm-00a9-0000-671d10a8 -a 3 --pt 90,45,0,-165 -n 0.05 --lang ja)
