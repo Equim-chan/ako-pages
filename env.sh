@@ -1,2 +1,2 @@
-OUTPUT=495fba06b18ee493.html
-ARGS=(--anonymous -m 210616-3fa5b781-2d77-461c-aec2-1e826727315d_a448220953 -e -n 0.001 --lang ja)
+OUTPUT=63e3df25356b0110.html
+ARGS=(--anonymous -m 210616-9ac55a7a-906e-4782-a330-a08578df4869_a466194814 --pt 90,45,0,-180 -n 0.05 --lang ja)
