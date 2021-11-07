@@ -1,2 +1,2 @@
-OUTPUT=fa646363c0fedade.html
-ARGS=(--anonymous -t 2021110700gm-0089-0000-6a2a77f8 -a 1 --pt 75,30,0,-105 -n 0.1 --lang ja)
+OUTPUT=4f351038b46a7fbf.html
+ARGS=(--anonymous -t 2021110712gm-0061-0000-002796f0 -a 0 -e -n 0.001 --lang ja)
